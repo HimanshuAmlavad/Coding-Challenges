@@ -197,7 +197,7 @@ struct node *huffmanTree(struct node *root)
     printf("entered huffman\n");
     int flag = 0;
     struct node *q = NULL, *p = root, *parent = NULL, *temp = NULL;
-    while (p != NULL)
+    while (p->left != NULL)
     {
         printf("traverse->while\n");
         p = p->right;
