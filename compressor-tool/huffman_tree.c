@@ -58,10 +58,11 @@ struct node *joinNode(struct node *root, struct node *newNode)
 
 void inorderTraversal(struct node *root)
 {
+    
     if (root != NULL)
     {
         inorderTraversal(root->left);
-        printf("%c, %d", root->data, root->feq);
+        printf("%c:%d,", root->data, root->feq);
         inorderTraversal(root->right);
     }
     return;
@@ -192,58 +193,87 @@ struct node *addFrq(struct node *left, struct node *right)
     parent->right = right;
     return parent;
 }
+
 struct node *huffmanTree(struct node *root)
 {
     printf("entered huffman\n");
-    int flag = 0;
-    struct node *q = NULL, *p = root, *parent = NULL, *temp = NULL;
+    // Handle edge cases
+    if (root == NULL || root->right == NULL) {
+        return root;
+    }
+
+    struct node *q = NULL;      // for second minimum node
+    struct node *p = root;      // for first minimum node
+    struct node *parent = NULL; // for new parent node
+    struct node *temp = NULL;   // for keeping track of next node
+    int nodesRemaining = 1;     // to track if we still have nodes to process
     
-    while (p->right != NULL)
-    {
+    // Go to last node (minimum frequency)
+    while (p->right != NULL) {
         printf("traverse->while\n");
         p = p->right;
+        nodesRemaining++;
     }
-    p->left->right = NULL;
-    do
-    {
+    
+    // Disconnect the link list connection
+    if (p->left != NULL) {
+        p->left->right = NULL;
+    }
+
+    do {
         printf("huff->do while\n");
-        if (p == NULL)
-        {
-            printf("huff-> do while-> if\n");
-            root = parent;
-            flag = 0;
-            q = NULL;
-        }
-        
-        else if (q == NULL && flag == 0)
-        {
-            printf("huff-> do while-> else if\n");
-            q = p->left;
-            temp = q->left;
+        if (q == NULL) { // First iteration or after parent becomes root
+            printf("huff-> do while-> first case\n");
+            if (p == NULL) {
+                break;  // No more nodes to process
+            }
+            // Get last two nodes
+            q = p->left;        // Second last node
+            if (q == NULL) {
+                return p;  // Only one node left
+            }
+            temp = q->left;     // Third last node
+            
+            // Disconnect horizontal links
             q->left = NULL;
             p->left = NULL;
-            temp->right = NULL;
-            parent = ((p->feq < q->feq) ? addFrq(p, q) : addFrq(q, p));
-            flag = 1;
+            if (temp != NULL) {
+                temp->right = NULL;
+            }
+            
+            // Create first subtree
+            parent = (p->feq < q->feq) ? addFrq(p, q) : addFrq(q, p);
+            printf("Created parent with freq %d\n", parent->feq);
+            nodesRemaining--;
         }
-        
-        else if (q != NULL && flag == 1)
-        {
-            printf("huff-> do while-> else if 2\n");
+        else { // Subsequent iterations
+            printf("huff-> do while-> combining subtrees\n");
             q = parent;
             p = temp;
+            
+            if (p == NULL) {
+                return q;  // No more nodes to combine
+            }
+            
+            // Get next node if available
             temp = p->left;
-            temp->right = NULL;
+            if (temp != NULL) {
+                temp->right = NULL;
+            }
             p->left = NULL;
-            parent = ((p->feq < q->feq) ? addFrq(p, q) : addFrq(q, p));
+            
+            // Create new subtree
+            parent = (p->feq < q->feq) ? addFrq(p, q) : addFrq(q, p);
+            printf("Created new parent with freq %d\n", parent->feq);
+            nodesRemaining--;
         }
+    } while (nodesRemaining > 0);
 
-    } while (flag);
     printf("huff -> do while finished\n");
-    inorderTraversal(root);
-    return root;
+    return parent;
 }
-int main()
+
+int main() 
 {
     char str[20];
     struct node *root = NULL;
@@ -254,11 +284,16 @@ int main()
     // printf("mainfunction input taken\n%s", str);
 
     root = count(str, root);
-    printf("return from count\n");
+    printf("After counting frequencies:\n");
+    traverse(root);
+    
     root = sortLinkedList(root);
-    huffmanTree(root);
-
-    // traverse(root);
-    // printf("mainfunction check\n");
+    printf("\nAfter sorting:\n");
+    traverse(root);
+    
+    root = huffmanTree(root);
+    printf("\nFinal Huffman Tree:\n");
+    inorderTraversal(root);
+    
     return 0;
 }
