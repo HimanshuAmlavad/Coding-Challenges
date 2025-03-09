@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ENCODE_SIZE 51
+
 struct node
 {
     int feq;
@@ -10,16 +12,33 @@ struct node
     struct node *right;
 };
 
-// struct node *createNode(struct node *root)
-// {
-//     struct node *newNode;
-//     newNode = (struct node *)malloc(sizeof(struct node));
+typedef struct StrNode
+{
+    char *str;
+    struct StrNode *next;
+} StrNode;
 
-//     newNode->left = NULL;
-//     newNode->right = NULL;
+StrNode *createNodeForLinkedLIst(StrNode *start)
+{
+    StrNode *newNode = (StrNode *)malloc(sizeof(StrNode));
+    newNode->next = NULL;
 
-//     return newNode;
-// }
+    newNode->str = (char *)malloc(sizeof(char) * ENCODE_SIZE);
+    newNode->str[strlen(newNode->str) - 1] = '\0';
+
+    if (start == NULL)
+        start = newNode;
+    else
+    {
+        StrNode *ptr = start;
+        while (ptr->next != NULL)
+        {
+            ptr = ptr->next;
+        }
+        ptr->next = newNode;
+    }
+    return start;
+}
 
 // function to create a node and add to link list.
 struct node *createNode(char alp, int feq)
@@ -58,7 +77,7 @@ struct node *joinNode(struct node *root, struct node *newNode)
 
 void inorderTraversal(struct node *root)
 {
-    
+
     if (root != NULL)
     {
         inorderTraversal(root->left);
@@ -121,7 +140,7 @@ struct node *count(char *str, struct node *root)
         root = checkEle(str[i], root); // calling the function to check wheter the element exist in list or not. argument are alphabate nad linked list.
         // traverse(root);
     }
-    traverse(root);
+    // traverse(root);
     return root;
 }
 
@@ -179,7 +198,7 @@ struct node *sortLinkedList(struct node *root)
 
     } while (swapped);
     // printf("\n After the sort \n");
-    traverse(root);
+    // traverse(root);
     return root;
 }
 
@@ -198,7 +217,8 @@ struct node *huffmanTree(struct node *root)
 {
     printf("entered huffman\n");
     // Handle edge cases
-    if (root == NULL || root->right == NULL) {
+    if (root == NULL || root->right == NULL)
+    {
         return root;
     }
 
@@ -207,61 +227,71 @@ struct node *huffmanTree(struct node *root)
     struct node *parent = NULL; // for new parent node
     struct node *temp = NULL;   // for keeping track of next node
     int nodesRemaining = 1;     // to track if we still have nodes to process
-    
+
     // Go to last node (minimum frequency)
-    while (p->right != NULL) {
-        printf("traverse->while\n");
+    while (p->right != NULL)
+    {
+        // printf("traverse->while\n");
         p = p->right;
         nodesRemaining++;
     }
-    
+
     // Disconnect the link list connection
-    if (p->left != NULL) {
+    if (p->left != NULL)
+    {
         p->left->right = NULL;
     }
 
-    do {
-        printf("huff->do while\n");
-        if (q == NULL) { // First iteration or after parent becomes root
-            printf("huff-> do while-> first case\n");
-            if (p == NULL) {
-                break;  // No more nodes to process
+    do
+    {
+        // printf("huff->do while\n");
+        if (q == NULL)
+        { // First iteration or after parent becomes root
+            // printf("huff-> do while-> first case\n");
+            if (p == NULL)
+            {
+                break; // No more nodes to process
             }
             // Get last two nodes
-            q = p->left;        // Second last node
-            if (q == NULL) {
-                return p;  // Only one node left
+            q = p->left; // Second last node
+            if (q == NULL)
+            {
+                return p; // Only one node left
             }
-            temp = q->left;     // Third last node
-            
+            temp = q->left; // Third last node
+
             // Disconnect horizontal links
             q->left = NULL;
             p->left = NULL;
-            if (temp != NULL) {
+            if (temp != NULL)
+            {
                 temp->right = NULL;
             }
-            
+
             // Create first subtree
             parent = (p->feq < q->feq) ? addFrq(p, q) : addFrq(q, p);
-            printf("Created parent with freq %d\n", parent->feq);
+            // printf("Created parent with freq %d\n", parent->feq);
             nodesRemaining--;
         }
-        else { // Subsequent iterations
-            printf("huff-> do while-> combining subtrees\n");
+        else
+        { // Subsequent iterations
+            // printf("huff-> do while-> combining subtrees\n");
             q = parent;
             p = temp;
-            
-            if (p == NULL) {
-                return q;  // No more nodes to combine
+
+            if (p == NULL)
+            {
+                return q; // No more nodes to combine
             }
-            
+
             // Get next node if available
             temp = p->left;
-            if (temp != NULL) {
+            if (temp != NULL)
+            {
                 temp->right = NULL;
             }
             p->left = NULL;
-            
+
             // Create new subtree
             parent = (p->feq < q->feq) ? addFrq(p, q) : addFrq(q, p);
             printf("Created new parent with freq %d\n", parent->feq);
@@ -269,11 +299,87 @@ struct node *huffmanTree(struct node *root)
         }
     } while (nodesRemaining > 0);
 
-    printf("huff -> do while finished\n");
+    // printf("huff -> do while finished\n");
     return parent;
 }
 
-int main() 
+int findchar(char alp, char *LR, struct node *root, int index)
+{
+    printf("\ninside findchar\n");
+    if (root == NULL)
+        return 0;
+    if (root->data == alp)
+    {
+        LR[index] = '\0';
+        printf("inside findchar data == alp\n");
+        // printf("\npath to '%c' : %s\n",alp, LR);
+        return 1;
+    }
+
+    LR[index] = '0';
+    printf("going to left\n");
+    if (findchar(alp, LR, root->left, index + 1))
+    return 1;
+    
+    LR[index] = '1';
+    printf("going to right\n");
+    if (findchar(alp, LR, root->right, index + 1))
+    return 1;
+    
+    printf("going to backtrack\n");
+    LR[index] = '\0';
+
+    return 0;
+}
+
+void encode(char *str, struct node *root)
+{
+    printf("\ninside encode\n");
+    StrNode *start = NULL;
+
+    int inparr = 0;
+
+    char LR[100];
+    start = createNodeForLinkedLIst(start);
+    StrNode *ptr = start;
+    while (ptr->next != NULL)
+        ptr = ptr->next;
+        printf("ptr at last\n");
+    for (int i = 0; str[i]; i++)
+    {
+        findchar(str[i], LR, root, 0);
+        printf("\npath to '%c' : %s\n", str[i], LR);
+        printf("inside the for loop\n");
+
+        if (start->str[inparr] == '\0')
+        {    printf("inside for->if\n");
+            createNodeForLinkedLIst(start);
+            inparr = 0;
+            while (ptr->next != NULL)
+                ptr = ptr->next;
+                printf("if->copying data from LR to linked list\n");
+                for (int j = 0; LR[j]; j++)
+                {
+                    ptr->str[inparr] = LR[j];
+                    inparr++;
+                } 
+                printf("if->copying complet\n");
+            }
+            else
+            {
+                printf("else->copying data from LR to linked list\n");
+                for (int j = 0; LR[j]; j++)
+                {
+                    ptr->str[inparr] = LR[j];
+                    inparr++;
+                }
+                printf("else->copying complet\n");
+        }
+    }
+    printf("!!success!!");
+}
+
+int main()
 {
     char str[20];
     struct node *root = NULL;
@@ -286,14 +392,16 @@ int main()
     root = count(str, root);
     printf("After counting frequencies:\n");
     traverse(root);
-    
+
     root = sortLinkedList(root);
     printf("\nAfter sorting:\n");
     traverse(root);
-    
+
     root = huffmanTree(root);
     printf("\nFinal Huffman Tree:\n");
     inorderTraversal(root);
-    
+
+    encode(str, root);
+
     return 0;
 }
