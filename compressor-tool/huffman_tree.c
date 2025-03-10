@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "memoryManager.c"
+
 #define ENCODE_SIZE 51
 
 struct node
@@ -20,10 +22,10 @@ typedef struct StrNode
 
 StrNode *createNodeForLinkedLIst(StrNode *start)
 {
-    StrNode *newNode = (StrNode *)malloc(sizeof(StrNode));
+    StrNode *newNode = (StrNode *)MMalloc(sizeof(StrNode));
     newNode->next = NULL;
 
-    newNode->str = (char *)malloc(sizeof(char) * ENCODE_SIZE);
+    newNode->str = (char *)MMalloc(sizeof(char) * ENCODE_SIZE);
     newNode->str[strlen(newNode->str) - 1] = '\0';
 
     if (start == NULL)
@@ -44,10 +46,10 @@ StrNode *createNodeForLinkedLIst(StrNode *start)
 struct node *createNode(char alp, int feq)
 {
     // printf("entered in create node\n");
-    struct node *newnode = NULL;                          // creating two struct node type pointer newnode which is a new node of list, ptr which address of what root has which is null currently.
-    newnode = (struct node *)malloc(sizeof(struct node)); // creating new node;
-    newnode->data = alp;                                  // storing alphabate into new nodes's data.
-    newnode->feq = feq;                                   // assigning frepuency to 1 because we storing the alphabat which means it occure one's.
+    struct node *newnode = NULL;                           // creating two struct node type pointer newnode which is a new node of list, ptr which address of what root has which is null currently.
+    newnode = (struct node *)MMalloc(sizeof(struct node)); // creating new node;
+    newnode->data = alp;                                   // storing alphabate into new nodes's data.
+    newnode->feq = feq;                                    // assigning frepuency to 1 because we storing the alphabat which means it occure one's.
     newnode->left = NULL;
     newnode->right = NULL;
 
@@ -303,38 +305,48 @@ struct node *huffmanTree(struct node *root)
     return parent;
 }
 
+void printEncodedMessage(StrNode *start)
+{
+    printf("Encoded message \n");
+    while (start != NULL)
+    {
+        printf("%s", start->str);
+        start = start->next;
+    }
+}
+
 int findchar(char alp, char *LR, struct node *root, int index)
 {
-    printf("\ninside findchar\n");
+    // printf("\ninside findchar\n");
     if (root == NULL)
         return 0;
     if (root->data == alp)
     {
         LR[index] = '\0';
-        printf("inside findchar data == alp\n");
+        // printf("inside findchar data == alp\n");
         // printf("\npath to '%c' : %s\n",alp, LR);
         return 1;
     }
 
     LR[index] = '0';
-    printf("going to left\n");
+    // printf("going to left\n");
     if (findchar(alp, LR, root->left, index + 1))
-    return 1;
-    
+        return 1;
+
     LR[index] = '1';
-    printf("going to right\n");
+    // printf("going to right\n");
     if (findchar(alp, LR, root->right, index + 1))
-    return 1;
-    
-    printf("going to backtrack\n");
+        return 1;
+
+    // printf("going to backtrack\n");
     LR[index] = '\0';
 
     return 0;
 }
 
-void encode(char *str, struct node *root)
+StrNode* encodingMessage(char *str, struct node *root)
 {
-    printf("\ninside encode\n");
+    // printf("\ninside encode\n");
     StrNode *start = NULL;
 
     int inparr = 0;
@@ -344,43 +356,68 @@ void encode(char *str, struct node *root)
     StrNode *ptr = start;
     while (ptr->next != NULL)
         ptr = ptr->next;
-        printf("ptr at last\n");
+    printf("ptr at last\n");
     for (int i = 0; str[i]; i++)
     {
         findchar(str[i], LR, root, 0);
         printf("\npath to '%c' : %s\n", str[i], LR);
-        printf("inside the for loop\n");
+        // printf("inside the for loop\n");
 
         if (start->str[inparr] == '\0')
-        {    printf("inside for->if\n");
+        {
+            //  printf("inside for->if\n");
             createNodeForLinkedLIst(start);
             inparr = 0;
             while (ptr->next != NULL)
                 ptr = ptr->next;
-                printf("if->copying data from LR to linked list\n");
-                for (int j = 0; LR[j]; j++)
-                {
-                    ptr->str[inparr] = LR[j];
-                    inparr++;
-                } 
-                printf("if->copying complet\n");
-            }
-            else
+            // printf("if->copying data from LR to linked list\n");
+            for (int j = 0; LR[j]; j++)
             {
-                printf("else->copying data from LR to linked list\n");
-                for (int j = 0; LR[j]; j++)
-                {
-                    ptr->str[inparr] = LR[j];
-                    inparr++;
-                }
-                printf("else->copying complet\n");
+                ptr->str[inparr] = LR[j];
+                inparr++;
+            }
+            // printf("if->copying complet\n");
+        }
+        else
+        {
+            // printf("else->copying data from LR to linked list\n");
+            for (int j = 0; LR[j]; j++)
+            {
+                ptr->str[inparr] = LR[j];
+                inparr++;
+            }
+            // printf("else->copying complet\n");
         }
     }
-    printf("!!success!!");
+    printEncodedMessage(start);
+    return start;  // Return the start pointer
 }
 
-int main()
-{
+void freeHuffmanTree(struct node* root) {
+    if (root == NULL) {
+        return;
+    }
+    
+    // Post-order traversal to free nodes
+    freeHuffmanTree(root->left);
+    freeHuffmanTree(root->right);
+    MFree(root);
+}
+
+void freeEncodedList(StrNode* start) {
+    StrNode* current = start;
+    StrNode* next;
+    
+    while (current != NULL) {
+        next = current->next;
+        MFree(current->str);  // Free the string buffer first
+        MFree(current);       // Then free the node itself
+        current = next;
+    }
+}
+
+// Update main() to use these functions:
+int main() {
     char str[20];
     struct node *root = NULL;
     printf("Enter the string : ");
@@ -401,7 +438,10 @@ int main()
     printf("\nFinal Huffman Tree:\n");
     inorderTraversal(root);
 
-    encode(str, root);
-
+    StrNode* encodedList = encodingMessage(str, root);  // Store the returned pointer
+    
+    // Free all allocated memory
+    freeHuffmanTree(root);
+    freeEncodedList(encodedList);  // Use the stored pointer
     return 0;
 }
