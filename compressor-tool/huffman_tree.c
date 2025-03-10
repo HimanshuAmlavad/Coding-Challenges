@@ -26,7 +26,7 @@ StrNode *createNodeForLinkedLIst(StrNode *start)
     newNode->next = NULL;
 
     newNode->str = (char *)MMalloc(sizeof(char) * ENCODE_SIZE);
-    newNode->str[strlen(newNode->str) - 1] = '\0';
+    memset(newNode->str, 0, ENCODE_SIZE); // Initialize buffer to zeros
 
     if (start == NULL)
         start = newNode;
@@ -416,32 +416,64 @@ void freeEncodedList(StrNode* start) {
     }
 }
 
-// Update main() to use these functions:
-int main() {
-    char str[20];
+void encode(char str[])
+{
     struct node *root = NULL;
-    printf("Enter the string : ");
-    fgets(str, sizeof(str), stdin);
-    str[strlen(str) - 1] = '\0';
-
-    // printf("mainfunction input taken\n%s", str);
-
     root = count(str, root);
     printf("After counting frequencies:\n");
     traverse(root);
-
+    
     root = sortLinkedList(root);
     printf("\nAfter sorting:\n");
     traverse(root);
-
+    
     root = huffmanTree(root);
     printf("\nFinal Huffman Tree:\n");
     inorderTraversal(root);
-
+    
     StrNode* encodedList = encodingMessage(str, root);  // Store the returned pointer
     
     // Free all allocated memory
     freeHuffmanTree(root);
     freeEncodedList(encodedList);  // Use the stored pointer
+    
+}
+
+void decoder(char str[])
+{
+       printf("\n Please provide encoded message:-\n");
+
+}
+// Update main() to use these functions:
+int main() {
+    char choice[2];
+    char str[100];
+    do
+    {   
+        printf("\nProvide your chioice (for encode (-e), for decode (-d) & for exit (-o))\nSelect: ");
+        fflush(stdin);
+        scanf("%s", choice);
+        
+        if (!strcmp("-e", choice))
+        {
+            printf("Enter the string: ");
+            fflush(stdin);
+            fgets(str, sizeof(str), stdin);
+            str[strlen(str) - 1] = '\0';
+            encode(str);
+        }
+        else if (!strcmp("-d", choice))
+        {
+           printf("Please provide the key:-\n");
+           scanf("%s",&str);
+           decoder(str);
+        }
+
+        else if(!strcmp("-o", choice)) break;
+
+        else printf("Warning : Invalid choice");
+
+    } while (1);
+    
     return 0;
 }
