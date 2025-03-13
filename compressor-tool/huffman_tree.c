@@ -101,6 +101,15 @@ void traverse(struct node *root)
         ptr = ptr->right;
     }
 }
+void decoderLinkedlistTraversal(StrNode *start)
+{
+    printf("Stored String: ");
+    while (start) {
+        printf("%s", start->str);
+        start = start->next;
+    }
+    printf("\n");
+}
 
 struct node *checkEle(char alp, struct node *root)
 {
@@ -344,7 +353,7 @@ int findchar(char alp, char *LR, struct node *root, int index)
     return 0;
 }
 
-StrNode* encodingMessage(char *str, struct node *root)
+StrNode *encodingMessage(char *str, struct node *root)
 {
     // printf("\ninside encode\n");
     StrNode *start = NULL;
@@ -356,7 +365,7 @@ StrNode* encodingMessage(char *str, struct node *root)
     StrNode *ptr = start;
     while (ptr->next != NULL)
         ptr = ptr->next;
-    printf("ptr at last\n");
+    // printf("ptr at last\n")
     for (int i = 0; str[i]; i++)
     {
         findchar(str[i], LR, root, 0);
@@ -390,28 +399,32 @@ StrNode* encodingMessage(char *str, struct node *root)
         }
     }
     printEncodedMessage(start);
-    return start;  // Return the start pointer
+    return start; // Return the start pointer
 }
 
-void freeHuffmanTree(struct node* root) {
-    if (root == NULL) {
+void freeHuffmanTree(struct node *root)
+{
+    if (root == NULL)
+    {
         return;
     }
-    
+
     // Post-order traversal to free nodes
     freeHuffmanTree(root->left);
     freeHuffmanTree(root->right);
     MFree(root);
 }
 
-void freeEncodedList(StrNode* start) {
-    StrNode* current = start;
-    StrNode* next;
-    
-    while (current != NULL) {
+void freeEncodedList(StrNode *start)
+{
+    StrNode *current = start;
+    StrNode *next;
+
+    while (current != NULL)
+    {
         next = current->next;
-        MFree(current->str);  // Free the string buffer first
-        MFree(current);       // Then free the node itself
+        MFree(current->str); // Free the string buffer first
+        MFree(current);      // Then free the node itself
         current = next;
     }
 }
@@ -422,58 +435,119 @@ void encode(char str[])
     root = count(str, root);
     printf("After counting frequencies:\n");
     traverse(root);
-    
+
     root = sortLinkedList(root);
     printf("\nAfter sorting:\n");
     traverse(root);
-    
+
     root = huffmanTree(root);
     printf("\nFinal Huffman Tree:\n");
     inorderTraversal(root);
-    
-    StrNode* encodedList = encodingMessage(str, root);  // Store the returned pointer
-    
+
+    StrNode *encodedList = encodingMessage(str, root); // Store the returned pointer
+
     // Free all allocated memory
     freeHuffmanTree(root);
-    freeEncodedList(encodedList);  // Use the stored pointer
-    
+    freeEncodedList(encodedList); // Use the stored pointer
 }
 
+StrNode *create_linkedlist_for_decoding()
+{
+    int ind = 0;
+    char ch;
+    StrNode *ptr, *start = NULL;
+    
+    // Create first node
+    start = createNodeForLinkedLIst(NULL);  // Pass NULL to create new start
+    ptr = start;
+
+    printf("Provide encoded message (Press Enter to stop):\n");
+    while ((ch = getchar()) != '\n' && ch != EOF)
+    {
+        // If current node's array is full, create new node
+        if (ind >= ENCODE_SIZE - 1)
+        {
+            ptr->str[ind] = '\0';  // Null terminate current node
+            StrNode* newNode = createNodeForLinkedLIst(NULL);  // Create new node
+            ptr->next = newNode;   // Link new node
+            ptr = newNode;         // Move to new node
+            ind = 0;               // Reset index
+        }
+        
+        // Store character
+        ptr->str[ind++] = ch;
+    }
+    
+    // Null terminate the last node
+    ptr->str[ind] = '\0';
+    
+    // Debug print
+    printf("Input received. Checking stored data:\n");
+    StrNode* temp = start;
+    while (temp != NULL) {
+        printf("Node content: [%s]\n", temp->str);
+        temp = temp->next;
+    }
+    
+    return start;
+}
+
+// Update decoder function
 void decoder(char str[])
 {
-       printf("\n Please provide encoded message:-\n");
+    // Clear input buffer before reading
+    int c;
 
+    while ((c = getchar()) != '\n' && c != EOF);
+    
+    StrNode *start = create_linkedlist_for_decoding();
+    if (start != NULL) {
+        printf("\nStored encoded message:\n");
+        decoderLinkedlistTraversal(start);
+        freeEncodedList(start);
+    } else {
+        printf("Error: No input received\n");
+    }
 }
-// Update main() to use these functions:
-int main() {
-    char choice[2];
+
+// Update main function to use fgets instead of scanf
+int main()
+{
+    char choice[3];  // Increased size to accommodate \n and \0
     char str[100];
+    
     do
-    {   
-        printf("\nProvide your chioice (for encode (-e), for decode (-d) & for exit (-o))\nSelect: ");
-        fflush(stdin);
-        scanf("%s", choice);
-        
+    {
+        printf("\nProvide your choice (for encode (-e), for decode (-d) & for exit (-o))\nSelect: ");
+        if (fgets(choice, sizeof(choice), stdin) == NULL) {
+            printf("Error reading input\n");
+            continue;
+        }
+        choice[strcspn(choice, "\n")] = '\0';  // Remove newline
+
         if (!strcmp("-e", choice))
         {
             printf("Enter the string: ");
-            fflush(stdin);
-            fgets(str, sizeof(str), stdin);
-            str[strlen(str) - 1] = '\0';
-            encode(str);
+            if (fgets(str, sizeof(str), stdin) != NULL) {
+                str[strcspn(str, "\n")] = '\0';
+                encode(str);
+            }
         }
         else if (!strcmp("-d", choice))
         {
-           printf("Please provide the key:-\n");
-           scanf("%s",&str);
-           decoder(str);
+            printf("Provide key:-");
+            scanf("%s",&str);
+            decoder(str);
         }
-
-        else if(!strcmp("-o", choice)) break;
-
-        else printf("Warning : Invalid choice");
-
+        else if (!strcmp("-o", choice))
+        {
+            break;
+        }
+        else
+        {
+            printf("Warning: Invalid choice\n");
+        }
     } while (1);
-    
+
     return 0;
 }
