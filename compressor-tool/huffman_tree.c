@@ -468,10 +468,13 @@ StrNode *create_linkedlist_for_decoding()
         if (ind >= ENCODE_SIZE - 1)
         {
             ptr->str[ind] = '\0';  // Null terminate current node
-            StrNode* newNode = createNodeForLinkedLIst(NULL);  // Create new node
-            ptr->next = newNode;   // Link new node
-            ptr = newNode;         // Move to new node
-            ind = 0;               // Reset index
+            start = createNodeForLinkedLIst(start);  // Update start with new node
+            // Move ptr to the last node
+            ptr = start;
+            while (ptr->next != NULL) {
+                ptr = ptr->next;
+            }
+            ind = 0;  // Reset index
         }
         
         // Store character
@@ -483,10 +486,10 @@ StrNode *create_linkedlist_for_decoding()
     
     // Debug print
     printf("Input received. Checking stored data:\n");
-    StrNode* temp = start;
-    while (temp != NULL) {
-        printf("Node content: [%s]\n", temp->str);
-        temp = temp->next;
+    ptr = start;
+    while (ptr != NULL) {
+        printf("Node content: [%s]\n", ptr->str);
+        ptr = ptr->next;
     }
     
     return start;
