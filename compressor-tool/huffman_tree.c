@@ -494,7 +494,10 @@ StrNode *create_linkedlist_for_decoding()
     
     return start;
 }
-
+void creatingHuffmanForDecoder(char str[])
+{
+     
+}
 // Update decoder function
 void decoder(char str[])
 {
@@ -522,6 +525,7 @@ int main()
     do
     {
         printf("\nProvide your choice (for encode (-e), for decode (-d) & for exit (-o))\nSelect: ");
+        fflush(stdin);
         if (fgets(choice, sizeof(choice), stdin) == NULL) {
             printf("Error reading input\n");
             continue;
@@ -531,16 +535,18 @@ int main()
         if (!strcmp("-e", choice))
         {
             printf("Enter the string: ");
-            if (fgets(str, sizeof(str), stdin) != NULL) {
-                str[strcspn(str, "\n")] = '\0';
+                scanf("%s",&str);
+                // str[strcspn(str, "\n")] = '\0';
                 encode(str);
-            }
+            
         }
         else if (!strcmp("-d", choice))
         {
-            printf("Provide key:-");
-            scanf("%s",&str);
-            decoder(str);
+            printf("Provide key: ");
+            if (fgets(str, sizeof(str), stdin) != NULL) {
+                str[strcspn(str, "\n")] = '\0';
+                decoder(str);
+            }
         }
         else if (!strcmp("-o", choice))
         {
