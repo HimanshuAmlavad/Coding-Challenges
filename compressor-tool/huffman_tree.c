@@ -497,22 +497,43 @@ StrNode *create_linkedlist_for_decoding()
 
     return start;
 }
-int creatingHuffmanForDecoder(char*str)
+int creatingHuffmanForDecoder(char *str)
 {
     printf("entered huffman decoder\n");
     int freq = 0;
     char alp = '\0';
     int traverse = 0;
-    do
+    // while (str[traverse] != '\0');
+    // --traverse;
+    while (1)
     {
-        printf("%d %c\n",traverse, str[traverse]);
+        if (str[traverse] == ':')
+        {
+            --traverse;
+            if (str[traverse] == ',')
+            {
+                alp = '\0';
+                traverse += 2;
+                freq = str[traverse] - '0';
+                printf("%d %c\n", freq, alp);
+            }
+            else
+            {
+                alp = str[traverse];
+                traverse += 2;
+                freq = str[traverse] - '0';
+                printf("%d %c\n", freq, alp);
+            }
+        }
+        else if (str[traverse] == '\0')
+        {
+            printf("while exit\n");
+            break;
+        }
         
-    } while (str[traverse++] != '\0');
-    
-    // while (str[traverse++] != '\0')printf("%d\n",traverse);
-    printf("%s",str);
-    
-    
+        else
+            traverse++;
+    }
 }
 // Update decoder function
 void decoder(char str[])
@@ -566,11 +587,10 @@ int main()
         else if (!strcmp("-d", choice))
         {
             printf("Enter key:-\n");
-            scanf("%s",&str);
+            scanf("%s", &str);
             str[strcspn(str, "\n")] = '\0';
-                // printf("%s\n",str);
-                decoder(str);
-            
+            // printf("%s\n",str);
+            decoder(str);
         }
         else if (!strcmp("-o", choice))
         {
