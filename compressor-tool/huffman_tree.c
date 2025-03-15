@@ -104,7 +104,8 @@ void traverse(struct node *root)
 void decoderLinkedlistTraversal(StrNode *start)
 {
     printf("Stored String: ");
-    while (start) {
+    while (start)
+    {
         printf("%s", start->str);
         start = start->next;
     }
@@ -456,9 +457,9 @@ StrNode *create_linkedlist_for_decoding()
     int ind = 0;
     char ch;
     StrNode *ptr, *start = NULL;
-    
+
     // Create first node
-    start = createNodeForLinkedLIst(NULL);  // Pass NULL to create new start
+    start = createNodeForLinkedLIst(NULL); // Pass NULL to create new start
     ptr = start;
 
     printf("Provide encoded message (Press Enter to stop):\n");
@@ -467,36 +468,51 @@ StrNode *create_linkedlist_for_decoding()
         // If current node's array is full, create new node
         if (ind >= ENCODE_SIZE - 1)
         {
-            ptr->str[ind] = '\0';  // Null terminate current node
-            start = createNodeForLinkedLIst(start);  // Update start with new node
+            ptr->str[ind] = '\0';                   // Null terminate current node
+            start = createNodeForLinkedLIst(start); // Update start with new node
             // Move ptr to the last node
             ptr = start;
-            while (ptr->next != NULL) {
+            while (ptr->next != NULL)
+            {
                 ptr = ptr->next;
             }
-            ind = 0;  // Reset index
+            ind = 0; // Reset index
         }
-        
+
         // Store character
         ptr->str[ind++] = ch;
     }
-    
+
     // Null terminate the last node
     ptr->str[ind] = '\0';
-    
+
     // Debug print
     printf("Input received. Checking stored data:\n");
     ptr = start;
-    while (ptr != NULL) {
+    while (ptr != NULL)
+    {
         printf("Node content: [%s]\n", ptr->str);
         ptr = ptr->next;
     }
-    
+
     return start;
 }
-void creatingHuffmanForDecoder(char str[])
+int creatingHuffmanForDecoder(char*str)
 {
-     
+    printf("entered huffman decoder\n");
+    int freq = 0;
+    char alp = '\0';
+    int traverse = 0;
+    do
+    {
+        printf("%d %c\n",traverse, str[traverse]);
+        
+    } while (str[traverse++] != '\0');
+    
+    // while (str[traverse++] != '\0')printf("%d\n",traverse);
+    printf("%s",str);
+    
+    
 }
 // Update decoder function
 void decoder(char str[])
@@ -504,49 +520,57 @@ void decoder(char str[])
     // Clear input buffer before reading
     int c;
 
-    while ((c = getchar()) != '\n' && c != EOF);
-    
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+
     StrNode *start = create_linkedlist_for_decoding();
-    if (start != NULL) {
+    if (start != NULL)
+    {
         printf("\nStored encoded message:\n");
         decoderLinkedlistTraversal(start);
         freeEncodedList(start);
-    } else {
+    }
+    else
+    {
         printf("Error: No input received\n");
     }
+
+    printf("back to decoder\n");
+    creatingHuffmanForDecoder(str);
 }
 
 // Update main function to use fgets instead of scanf
 int main()
 {
-    char choice[3];  // Increased size to accommodate \n and \0
+    char choice[3]; // Increased size to accommodate \n and \0
     char str[100];
-    
+
     do
     {
         printf("\nProvide your choice (for encode (-e), for decode (-d) & for exit (-o))\nSelect: ");
         fflush(stdin);
-        if (fgets(choice, sizeof(choice), stdin) == NULL) {
+        if (fgets(choice, sizeof(choice), stdin) == NULL)
+        {
             printf("Error reading input\n");
             continue;
         }
-        choice[strcspn(choice, "\n")] = '\0';  // Remove newline
+        choice[strcspn(choice, "\n")] = '\0'; // Remove newline
 
         if (!strcmp("-e", choice))
         {
             printf("Enter the string: ");
-                scanf("%s",&str);
-                // str[strcspn(str, "\n")] = '\0';
-                encode(str);
-            
+            scanf("%s", &str);
+            str[strcspn(str, "\n")] = '\0';
+            encode(str);
         }
         else if (!strcmp("-d", choice))
         {
-            printf("Provide key: ");
-            if (fgets(str, sizeof(str), stdin) != NULL) {
-                str[strcspn(str, "\n")] = '\0';
+            printf("Enter key:-\n");
+            scanf("%s",&str);
+            str[strcspn(str, "\n")] = '\0';
+                // printf("%s\n",str);
                 decoder(str);
-            }
+            
         }
         else if (!strcmp("-o", choice))
         {
