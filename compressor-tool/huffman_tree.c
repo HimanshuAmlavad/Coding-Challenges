@@ -497,14 +497,64 @@ StrNode *create_linkedlist_for_decoding()
 
     return start;
 }
+
+struct node *huffmanNoadCreation(struct node *root, char alp, int freq, int *flag)
+{
+    struct node *left, *right, *newNode = NULL;
+    newNode = createNode(alp, freq);
+
+    if (flag == 0)
+    {
+        if (newNode->data != '\0' && right == NULL)
+        {
+            right = newNode;
+            printf("%d, %c",right->feq,right->data);
+        }
+        else if (newNode->data == '\0' && root == NULL)
+        {
+            root = newNode;
+            root->right = right;
+        }
+        else if (newNode->data != '\0' && left == NULL)
+        {
+            left = newNode;
+            root->left = left;
+            flag = 1;
+            right = root;
+        }
+    }
+    else if (flag == 1)
+    {
+        if (newNode->data == '\0')
+        {
+            root = newNode;
+            root->right = right;
+        }
+        else
+        {
+            left = newNode;
+            root->left = left;
+            right = root;
+        }
+    }
+    norderTraversal(root);
+    return root;
+}
+
 int creatingHuffmanForDecoder(char *str)
 {
     printf("entered huffman decoder\n");
-    int freq = 0;
+    int traverse = 0, freq = 0, flag = 0;
+
     char alp = '\0';
-    int traverse = 0;
-    // while (str[traverse] != '\0');
-    // --traverse;
+    struct node *root = NULL;
+    while (str[traverse] != '\0')
+    {
+        printf("%c", str[traverse]);
+        traverse++;
+    }
+    printf("\n");
+    --traverse;
     while (1)
     {
         if (str[traverse] == ':')
@@ -515,14 +565,18 @@ int creatingHuffmanForDecoder(char *str)
                 alp = '\0';
                 traverse += 2;
                 freq = str[traverse] - '0';
-                printf("%d %c\n", freq, alp);
+                printf("if->if frequency %d, character %c\n", freq, alp);
+                traverse -= 2;
+                root = huffmanNoadCreation(root, alp, freq, &flag);
             }
             else
             {
                 alp = str[traverse];
                 traverse += 2;
                 freq = str[traverse] - '0';
-                printf("%d %c\n", freq, alp);
+                printf("if->else frequency %d,character %c\n", freq, alp);
+                traverse -= 2;
+                root = huffmanNoadCreation(root, alp, freq, &flag);
             }
         }
         else if (str[traverse] == '\0')
@@ -530,9 +584,9 @@ int creatingHuffmanForDecoder(char *str)
             printf("while exit\n");
             break;
         }
-        
+
         else
-            traverse++;
+            traverse--;
     }
 }
 // Update decoder function
