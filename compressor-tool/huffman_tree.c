@@ -79,7 +79,7 @@ struct node *joinNode(struct node *root, struct node *newNode)
 
 void inorderTraversal(struct node *root)
 {
-
+    
     if (root != NULL)
     {
         inorderTraversal(root->left);
@@ -500,30 +500,36 @@ StrNode *create_linkedlist_for_decoding()
 
 struct node *huffmanNoadCreation(struct node *root, char alp, int freq, int *flag)
 {
-    struct node *left, *right, *newNode = NULL;
-    newNode = createNode(alp, freq);
+    // printf("entered huffman node creation\n");
+    static struct node *left = NULL;   // Make static to persist between calls
+    static struct node *right = NULL;  // Make static to persist between calls
+    struct node *newNode = createNode(alp, freq);
 
-    if (flag == 0)
+    if (*flag == 0)  // Correct pointer comparison
     {
+        // printf("flag 0\n");
         if (newNode->data != '\0' && right == NULL)
         {
             right = newNode;
-            printf("%d, %c",right->feq,right->data);
+            // printf("flag 0 if\n");
+            // printf("%d, %c\n", right->feq, right->data);
         }
         else if (newNode->data == '\0' && root == NULL)
         {
             root = newNode;
+            // printf("flag 0 else if\n");
             root->right = right;
         }
         else if (newNode->data != '\0' && left == NULL)
         {
+            // printf("flag 0 else if\n");
             left = newNode;
             root->left = left;
-            flag = 1;
+            *flag = 1;
             right = root;
         }
     }
-    else if (flag == 1)
+    else if (*flag == 1)
     {
         if (newNode->data == '\0')
         {
@@ -537,13 +543,16 @@ struct node *huffmanNoadCreation(struct node *root, char alp, int freq, int *fla
             right = root;
         }
     }
-    norderTraversal(root);
+    
+    // printf("Current tree state:\n");
+    printf("\n");
     return root;
 }
 
 int creatingHuffmanForDecoder(char *str)
 {
-    printf("entered huffman decoder\n");
+    // printf("entered huffman decoder\n");-o
+
     int traverse = 0, freq = 0, flag = 0;
 
     char alp = '\0';
@@ -565,7 +574,7 @@ int creatingHuffmanForDecoder(char *str)
                 alp = '\0';
                 traverse += 2;
                 freq = str[traverse] - '0';
-                printf("if->if frequency %d, character %c\n", freq, alp);
+                // printf("if->if frequency %d, character %c\n", freq, alp);
                 traverse -= 2;
                 root = huffmanNoadCreation(root, alp, freq, &flag);
             }
@@ -574,21 +583,23 @@ int creatingHuffmanForDecoder(char *str)
                 alp = str[traverse];
                 traverse += 2;
                 freq = str[traverse] - '0';
-                printf("if->else frequency %d,character %c\n", freq, alp);
+                // printf("if->else frequency %d,character %c\n", freq, alp);
                 traverse -= 2;
                 root = huffmanNoadCreation(root, alp, freq, &flag);
             }
         }
         else if (str[traverse] == '\0')
         {
-            printf("while exit\n");
+            // printf("while exit\n");
             break;
         }
-
+        
         else
-            traverse--;
+        traverse--;
     }
+    inorderTraversal(root);
 }
+
 // Update decoder function
 void decoder(char str[])
 {
