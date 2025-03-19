@@ -628,34 +628,36 @@ void decoder(char str[])
 // Update main function to use fgets instead of scanf
 int main()
 {
-    char choice[3]; // Increased size to accommodate \n and \0
+    char choice[3];
     char str[100];
 
     do
     {
         printf("\nProvide your choice (for encode (-e), for decode (-d) & for exit (-o))\nSelect: ");
-        fflush(stdin);
         if (fgets(choice, sizeof(choice), stdin) == NULL)
         {
             printf("Error reading input\n");
             continue;
         }
-        choice[strcspn(choice, "\n")] = '\0'; // Remove newline
-
+        choice[strcspn(choice, "\n")] = '\0';
+        fflush(stdin);
         if (!strcmp("-e", choice))
         {
             printf("Enter the string: ");
-            scanf("%s", &str);
-            str[strcspn(str, "\n")] = '\0';
-            encode(str);
+            if (fgets(str, sizeof(str), stdin) != NULL)
+            {
+                str[strcspn(str, "\n")] = '\0';
+                encode(str);
+            }
         }
         else if (!strcmp("-d", choice))
         {
-            printf("Enter key:-\n");
-            scanf("%s", &str);
-            str[strcspn(str, "\n")] = '\0';
-            // printf("%s\n",str);
-            decoder(str);
+            printf("Enter key: ");
+            if (fgets(str, sizeof(str), stdin) != NULL)
+            {
+                str[strcspn(str, "\n")] = '\0';
+                decoder(str);
+            }
         }
         else if (!strcmp("-o", choice))
         {
