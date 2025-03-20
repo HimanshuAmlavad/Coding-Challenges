@@ -545,7 +545,7 @@ struct node *huffmanNoadCreation(struct node *root, char alp, int freq, int *fla
     }
 
     // printf("Current tree state:\n");
-    printf("\n");
+    // printf("\n");
     return root;
 }
 
@@ -559,7 +559,7 @@ struct node *creatingHuffmanForDecoder(char *str)
     struct node *root = NULL;
     while (str[traverse] != '\0')
     {
-        // printf("%c", str[traverse]);
+        printf("%c", str[traverse]);
         traverse++;
     }
     printf("\n");
@@ -574,7 +574,7 @@ struct node *creatingHuffmanForDecoder(char *str)
                 alp = '\0';
                 traverse += 2;
                 freq = str[traverse] - '0';
-                // printf("if->if frequency %d, character %c\n", freq, alp);
+                printf("if->if frequency %d, character %c\n", freq, alp);
                 traverse -= 2;
                 root = huffmanNoadCreation(root, alp, freq, &flag);
             }
@@ -583,14 +583,14 @@ struct node *creatingHuffmanForDecoder(char *str)
                 alp = str[traverse];
                 traverse += 2;
                 freq = str[traverse] - '0';
-                // printf("if->else frequency %d,character %c\n", freq, alp);
+                printf("if->else frequency %d,character %c\n", freq, alp);
                 traverse -= 2;
                 root = huffmanNoadCreation(root, alp, freq, &flag);
             }
         }
         else if (str[traverse] == '\0')
         {
-            // printf("while exit\n");
+            printf("while exit\n");
             break;
         }
 
@@ -604,56 +604,63 @@ struct node *creatingHuffmanForDecoder(char *str)
 
 StrNode* decodeMessage(struct node *root, StrNode *start)
 {
-    printf("enter decoded message\n");
+    if (!root || !start) {
+        printf("Error: Invalid root or start pointer\n");
+        return NULL;
+    }
+
     int ind = 0, tra = 0;
     struct node *tree = root;
     StrNode *list = start;
-    StrNode  *decodeOutPut = createNodeForLinkedLIst(NULL);
+    StrNode *decodeOutPut = createNodeForLinkedLIst(NULL);
     StrNode *ptr = decodeOutPut;
 
-    while ( list != NULL && list->str[tra] != '\0' )
+    while (list != NULL)  // Changed condition to handle multiple nodes
     {
-        printf("inside while\n");
-        if (tree->left == NULL && tree->right == NULL)
-        {
-            printf("if\n");
-            if (ind >= ENCODE_SIZE - 1)  // Check if current node is full
-            {
-                ptr->str[ind] = '\0';
-                printf("if->if\n");
-                decodeOutPut = createNodeForLinkedLIst(decodeOutPut);
-                ptr = decodeOutPut;
-                while (ptr->next != NULL)
-                    ptr = ptr->next;
-                ind = 0;
-            }
-
-            else
-            {
-               ptr->str[ind++] = tree->data;
-               tree = root;
-            }
-        }
-        else if (list->str[tra] == '\0')
-        {
-            printf("else if\n");
+        // Reset tree if we've reached end of current node's string
+        if (list->str[tra] == '\0') {
             list = list->next;
             tra = 0;
+            continue;
         }
 
-        else if (list->str[tra] == '0')
-        {
-            printf("else if 2\n");
-            tree = tree->left;
-            tra++;
+        // Navigate tree based on encoded bits
+        if (list->str[tra] == '0') {
+            if (tree->left) {
+                tree = tree->left;
+            } else {
+                printf("Error: Invalid tree navigation\n");
+                return NULL;
+            }
         }
-        else if (list->str[tra] == '1')
-        {
-            printf("else if 3\n");
-            tree = tree->right;
-            tra++;
+        else if (list->str[tra] == '1') {
+            if (tree->right) {
+                tree = tree->right;
+            } else {
+                printf("Error: Invalid tree navigation\n");
+                return NULL;
+            }
+        }
+        tra++;
+
+        // Found a leaf node (character)
+        if (tree->left == NULL && tree->right == NULL) {
+            if (ind >= ENCODE_SIZE - 1) {
+                ptr->str[ind] = '\0';
+                decodeOutPut = createNodeForLinkedLIst(decodeOutPut);
+                ptr = decodeOutPut;
+                while (ptr->next != NULL) {
+                    ptr = ptr->next;
+                }
+                ind = 0;
+            }
+            
+            ptr->str[ind++] = tree->data;
+            tree = root;  // Reset to root for next character
         }
     }
+
+    // Null terminate the last node
     ptr->str[ind] = '\0';
     return decodeOutPut;
 }
