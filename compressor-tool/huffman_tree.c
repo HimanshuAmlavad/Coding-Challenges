@@ -79,7 +79,7 @@ struct node *joinNode(struct node *root, struct node *newNode)
 
 void inorderTraversal(struct node *root)
 {
-    
+
     if (root != NULL)
     {
         inorderTraversal(root->left);
@@ -103,7 +103,7 @@ void traverse(struct node *root)
 }
 void decoderLinkedlistTraversal(StrNode *start)
 {
-    printf("Stored String: ");
+    printf("\nStored String: ");
     while (start)
     {
         printf("%s", start->str);
@@ -501,11 +501,11 @@ StrNode *create_linkedlist_for_decoding()
 struct node *huffmanNoadCreation(struct node *root, char alp, int freq, int *flag)
 {
     // printf("entered huffman node creation\n");
-    static struct node *left = NULL;   // Make static to persist between calls
-    static struct node *right = NULL;  // Make static to persist between calls
+    static struct node *left = NULL;  // Make static to persist between calls
+    static struct node *right = NULL; // Make static to persist between calls
     struct node *newNode = createNode(alp, freq);
 
-    if (*flag == 0)  // Correct pointer comparison
+    if (*flag == 0) // Correct pointer comparison
     {
         // printf("flag 0\n");
         if (newNode->data != '\0' && right == NULL)
@@ -543,15 +543,15 @@ struct node *huffmanNoadCreation(struct node *root, char alp, int freq, int *fla
             right = root;
         }
     }
-    
+
     // printf("Current tree state:\n");
     printf("\n");
     return root;
 }
 
-int creatingHuffmanForDecoder(char *str)
+struct node *creatingHuffmanForDecoder(char *str)
 {
-    // printf("entered huffman decoder\n");-o
+    printf("entered huffman decoder\n");
 
     int traverse = 0, freq = 0, flag = 0;
 
@@ -559,7 +559,7 @@ int creatingHuffmanForDecoder(char *str)
     struct node *root = NULL;
     while (str[traverse] != '\0')
     {
-        printf("%c", str[traverse]);
+        // printf("%c", str[traverse]);
         traverse++;
     }
     printf("\n");
@@ -593,36 +593,93 @@ int creatingHuffmanForDecoder(char *str)
             // printf("while exit\n");
             break;
         }
-        
+
         else
-        traverse--;
+            traverse--;
     }
     inorderTraversal(root);
+    printf("\n");
+    return root;
+}
+
+StrNode* decodeMessage(struct node *root, StrNode *start)
+{
+    printf("enter decoded message\n");
+    int ind = 0, tra = 0;
+    struct node *tree = root;
+    StrNode *list = start;
+    StrNode  *decodeOutPut = createNodeForLinkedLIst(NULL);
+    StrNode *ptr = decodeOutPut;
+
+    while ( list != NULL && list->str[tra] != '\0' )
+    {
+        printf("inside while\n");
+        if (tree->left == NULL && tree->right == NULL)
+        {
+            printf("if\n");
+            if (ind >= ENCODE_SIZE - 1)  // Check if current node is full
+            {
+                ptr->str[ind] = '\0';
+                printf("if->if\n");
+                decodeOutPut = createNodeForLinkedLIst(decodeOutPut);
+                ptr = decodeOutPut;
+                while (ptr->next != NULL)
+                    ptr = ptr->next;
+                ind = 0;
+            }
+
+            else
+            {
+               ptr->str[ind++] = tree->data;
+               tree = root;
+            }
+        }
+        else if (list->str[tra] == '\0')
+        {
+            printf("else if\n");
+            list = list->next;
+            tra = 0;
+        }
+
+        else if (list->str[tra] == '0')
+        {
+            printf("else if 2\n");
+            tree = tree->left;
+            tra++;
+        }
+        else if (list->str[tra] == '1')
+        {
+            printf("else if 3\n");
+            tree = tree->right;
+            tra++;
+        }
+    }
+    ptr->str[ind] = '\0';
+    return decodeOutPut;
 }
 
 // Update decoder function
 void decoder(char str[])
 {
-    // Clear input buffer before reading
-    int c;
-
-    while ((c = getchar()) != '\n' && c != EOF)
-        ;
-
     StrNode *start = create_linkedlist_for_decoding();
     if (start != NULL)
     {
-        printf("\nStored encoded message:\n");
+        // printf("\nStored encoded message:");
         decoderLinkedlistTraversal(start);
+        
+        struct node *root = creatingHuffmanForDecoder(str);
+        StrNode *decodeOutPut = decodeMessage(root, start);
+        decoderLinkedlistTraversal(decodeOutPut);
+        
+        // Free memory after using it
         freeEncodedList(start);
+        freeEncodedList(decodeOutPut);
+        freeHuffmanTree(root);
     }
     else
     {
         printf("Error: No input received\n");
     }
-
-    printf("back to decoder\n");
-    creatingHuffmanForDecoder(str);
 }
 
 // Update main function to use fgets instead of scanf
@@ -647,6 +704,7 @@ int main()
             if (fgets(str, sizeof(str), stdin) != NULL)
             {
                 str[strcspn(str, "\n")] = '\0';
+                fflush(stdin);
                 encode(str);
             }
         }
